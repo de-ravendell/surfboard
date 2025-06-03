@@ -76,7 +76,7 @@
                 // If it already has http:// or https://, treat as URL
                 if (input.startsWith('http://') || input.startsWith('https://')) {
                     new URL(input);
-                    window.open(input, '_blank');
+                    window.location.href = input;
                     return;
                 }
                 
@@ -87,18 +87,18 @@
                         input = 'https://' + input;
                     }
                     new URL(input);
-                    window.open(input, '_blank');
+                    window.location.href = input;
                     return;
                 }
                 
                 // If we get here, treat as search terms
                 const searchUrl = `https://www.bing.com/search?q=${encodeURIComponent(input)}`;
-                window.open(searchUrl, '_blank');
+                window.location.href = searchUrl;
                 
             } catch (e) {
                 // If URL construction failed, fall back to search
                 const searchUrl = `https://www.bing.com/search?q=${encodeURIComponent(input)}`;
-                window.open(searchUrl, '_blank');
+                window.location.href = searchUrl;
             }
         }
         

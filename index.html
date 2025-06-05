@@ -3,114 +3,411 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="https://de-ravendell.github.io/minette.png" type="image/png">
-    <title>NAVIGATOR</title>
+    <title>Webster</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 500px;
-            margin: 0 auto;
-            padding: 20px;
-            text-align: center;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
         }
-        input {
-            width: 100%;
+        #header {
+            background-color: #f0f0f0;
             padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            gap: 10px;
         }
-        button {
+        #history-button {
+            padding: 8px 12px;
+            background-color: #e0e0e0;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        #history-button:hover {
+            background-color: #d0d0d0;
+        }
+        #history-dropdown {
+            position: absolute;
+            top: 50px;
+            left: 10px;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            width: 400px;
+            max-height: 500px;
+            overflow-y: auto;
+            display: none;
+            z-index: 100;
+        }
+        #history-dropdown.show {
+            display: block;
+        }
+        .history-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .history-item:hover {
+            background-color: #f5f5f5;
+        }
+        .history-url {
+            flex-grow: 1;
+            cursor: pointer;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .history-url:hover {
+            color: #0066cc;
+        }
+        .history-delete {
+            color: #999;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        .history-delete:hover {
+            color: #d32f2f;
+        }
+        #history-controls {
+            padding: 10px;
+            display: flex;
+            justify-content: flex-end;
+            background-color: #f5f5f5;
+            border-top: 1px solid #ddd;
+        }
+        #clear-history {
+            color: #d32f2f;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        #clear-history:hover {
+            text-decoration: underline;
+        }
+        #url-container {
+            flex-grow: 1;
+            display: flex;
+        }
+        #url-bar {
+            flex-grow: 1;
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px 0 0 4px;
+            font-size: 14px;
+        }
+        #go-button {
+            padding: 8px 16px;
             background-color: #4CAF50;
             color: white;
-            padding: 10px 20px;
+            border: none;
+            border-radius: 0 4px 4px 0;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        #go-button:hover {
+            background-color: #45a049;
+        }
+        #iframe-container {
+            flex-grow: 1;
+            position: relative;
+        }
+        #browser-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background-color: white;
+        }
+        .error-message {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: white;
+            color: #d32f2f;
+            font-size: 18px;
+        }
+        /* Custom confirmation dialog */
+        #confirmation-dialog {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        #confirmation-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            max-width: 400px;
+            width: 100%;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        #confirmation-message {
+            margin-bottom: 20px;
+        }
+        #confirmation-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        .confirmation-button {
+            padding: 8px 16px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
         }
-        #result {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #f0f8ff;
-            border-radius: 4px;
-            word-break: break-all;
+        #confirmation-cancel {
+            background-color: #e0e0e0;
         }
-        #overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 1);
-            display: none;
-            z-index: 1000;
+        #confirmation-cancel:hover {
+            background-color: #d0d0d0;
+        }
+        #confirmation-ok {
+            background-color: #d32f2f;
+            color: white;
+        }
+        #confirmation-ok:hover {
+            background-color: #b71c1c;
         }
     </style>
 </head>
 <body>
-    <div id="overlay"></div>
-    
-    <h2>NAVIGATOR</h2>
-    <input type="text" id="url" placeholder="Enter URL or search terms" required>
-    <button onclick="navigateToUrl()">GO</button>
-    
-    <div id="result" style="display: none;">
-        <p>Invalid URL. Please try again.</p>
+    <div id="header">
+        <button id="history-button">History ▼</button>
+        <div id="history-dropdown">
+            <div id="history-list"></div>
+            <div id="history-controls">
+                <span id="clear-history">Clear All History</span>
+            </div>
+        </div>
+        <div id="url-container">
+            <input type="text" id="url-bar" placeholder="Enter URL...">
+            <button id="go-button">GO</button>
+        </div>
+    </div>
+    <div id="iframe-container">
+        <iframe id="browser-frame" src="about:blank"></iframe>
+        <div id="error-message" class="error-message" style="display: none;"></div>
+    </div>
+
+    <!-- Custom confirmation dialog -->
+    <div id="confirmation-dialog">
+        <div id="confirmation-content">
+            <div id="confirmation-message">Are you sure you want to clear all history?</div>
+            <div id="confirmation-buttons">
+                <button id="confirmation-cancel" class="confirmation-button">Cancel</button>
+                <button id="confirmation-ok" class="confirmation-button">Clear</button>
+            </div>
+        </div>
     </div>
 
     <script>
-        function navigateToUrl() {
-            let input = document.getElementById('url').value.trim();
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlBar = document.getElementById('url-bar');
+            const goButton = document.getElementById('go-button');
+            const browserFrame = document.getElementById('browser-frame');
+            const errorMessage = document.getElementById('error-message');
+            const historyButton = document.getElementById('history-button');
+            const historyDropdown = document.getElementById('history-dropdown');
+            const historyList = document.getElementById('history-list');
+            const clearHistoryButton = document.getElementById('clear-history');
             
-            if (!input) {
-                const url = `https://www.bing.com`;
-                window.location.href = url;
-                return;
-            }
+            // Confirmation dialog elements
+            const confirmationDialog = document.getElementById('confirmation-dialog');
+            const confirmationCancel = document.getElementById('confirmation-cancel');
+            const confirmationOk = document.getElementById('confirmation-ok');
             
-            // Check if input looks like a domain (contains .com, .net, etc.)
-            const domainPattern = /\.(com|net|org|io|gov|edu|co|uk|de|fr|info|biz|xyz|me|tv|cc|ca|au|nz|jp|cn|in|br|ru|us|mx|es|it|ch|se|nl|be|at|dk|fi|no|pl|pt|ro|tr|gr|hu|sk|cz|sg|hk|my|id|ph|vn|th|kr|ae|sa|il|ir|za|ar|cl|pe|ms|one|co\.uk|org\.uk|ac\.uk|gov\.uk)(\/|$|\?|#)/i;
+            let history = JSON.parse(localStorage.getItem('websterHistory')) || [];
+            let currentUrl = 'about:blank';
             
-            try {
-                // If it already has http:// or https://, treat as URL
-                if (input.startsWith('http://') || input.startsWith('https://')) {
-                    new URL(input);
-                    window.location.href = input;
-                    return;
-                }
-                
-                // If it contains a domain pattern, treat as URL
-                if (domainPattern.test(input) &&!(input.includes(" "))) {
-                    // Add https:// if not present
-                    if (!input.startsWith('http://') && !input.startsWith('https://')) {
-                        input = 'https://' + input;
+            // Update the URL bar whenever the iframe location changes
+            function updateUrlFromFrame() {
+                try {
+                    const frameUrl = browserFrame.contentWindow.location.href;
+                    if (frameUrl !== 'about:blank' && frameUrl !== currentUrl) {
+                        currentUrl = frameUrl;
+                        urlBar.value = currentUrl;
+                        document.title = `Webster | ${currentUrl}`;
                     }
-                    new URL(input);
-                    window.location.href = input;
+                } catch (e) {
+                    // Cross-origin security exception - we can't access the URL
+                }
+            }
+            
+            // Check iframe URL periodically (since we can't always catch navigation events)
+            setInterval(updateUrlFromFrame, 500);
+            
+            // Add URL to history
+            function addToHistory(url) {
+                if (!url || url === 'about:blank') return;
+                
+                // Remove if already exists (to avoid duplicates)
+                history = history.filter(item => item !== url);
+                
+                // Add to beginning of array
+                history.unshift(url);
+                
+                // Limit history size
+                if (history.length > 100) {
+                    history.pop();
+                }
+                
+                // Save to localStorage
+                localStorage.setItem('websterHistory', JSON.stringify(history));
+                updateHistoryList();
+            }
+            
+            // Handle navigation when GO button is clicked or Enter is pressed
+            function navigateToUrl() {
+                let url = urlBar.value.trim();
+                
+                if (!url) return;
+                
+                // Add https:// if no protocol is specified
+                if (!/^https?:\/\//i.test(url)) {
+                    url = 'https://' + url;
+                }
+                
+                try {
+                    // Try to create a URL object to validate the URL
+                    const validUrl = new URL(url);
+                    url = validUrl.href; // Normalize the URL
+                    
+                    // Attempt to load the URL in the iframe
+                    browserFrame.src = url;
+                    currentUrl = url;
+                    document.title = `Webster | ${url}`;
+                    errorMessage.style.display = 'none';
+                    
+                    // Add to history immediately (don't wait for load event)
+                    addToHistory(url);
+                } catch (e) {
+                    showError("Invalid URL. Please enter a valid web address.");
+                }
+            }
+            
+            function showError(message) {
+                errorMessage.textContent = message;
+                errorMessage.style.display = 'flex';
+                browserFrame.src = 'about:blank';
+                currentUrl = 'about:blank';
+                document.title = 'Webster';
+            }
+            
+            // History functions
+            function updateHistoryList() {
+                historyList.innerHTML = '';
+                
+                if (history.length === 0) {
+                    historyList.innerHTML = '<div class="history-item" style="justify-content: center; color: #777;">No history yet</div>';
                     return;
                 }
                 
-                // If we get here, treat as search terms
-                const searchUrl = `https://www.bing.com/search?q=${encodeURIComponent(input)}`;
-                window.location.href = searchUrl;
-                
-            } catch (e) {
-                // If URL construction failed, fall back to search
-                const searchUrl = `https://www.bing.com/search?q=${encodeURIComponent(input)}`;
-                window.location.href = searchUrl;
+                history.forEach((url, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'history-item';
+                    
+                    const urlSpan = document.createElement('span');
+                    urlSpan.className = 'history-url';
+                    urlSpan.textContent = url;
+                    urlSpan.title = url;
+                    urlSpan.addEventListener('click', () => {
+                        urlBar.value = url;
+                        navigateToUrl();
+                        historyDropdown.classList.remove('show');
+                    });
+                    
+                    const deleteSpan = document.createElement('span');
+                    deleteSpan.className = 'history-delete';
+                    deleteSpan.innerHTML = '&times;';
+                    deleteSpan.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        history.splice(index, 1);
+                        localStorage.setItem('websterHistory', JSON.stringify(history));
+                        updateHistoryList();
+                    });
+                    
+                    item.appendChild(urlSpan);
+                    item.appendChild(deleteSpan);
+                    historyList.appendChild(item);
+                });
             }
-        }
-        
-        document.getElementById('url').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                navigateToUrl();
-            }
+            
+            // Toggle history dropdown
+            historyButton.addEventListener('click', () => {
+                historyDropdown.classList.toggle('show');
+            });
+            
+            // Custom confirmation dialog for clearing history
+            clearHistoryButton.addEventListener('click', () => {
+                confirmationDialog.style.display = 'flex';
+            });
+            
+            confirmationCancel.addEventListener('click', () => {
+                confirmationDialog.style.display = 'none';
+            });
+            
+            confirmationOk.addEventListener('click', () => {
+                history = [];
+                localStorage.setItem('websterHistory', JSON.stringify(history));
+                updateHistoryList();
+                confirmationDialog.style.display = 'none';
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!historyButton.contains(e.target) && !historyDropdown.contains(e.target)) {
+                    historyDropdown.classList.remove('show');
+                }
+            });
+            
+            // Initialize
+            goButton.addEventListener('click', navigateToUrl);
+            urlBar.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    navigateToUrl();
+                }
+            });
+            
+            // Block links that try to open in a new window
+            browserFrame.addEventListener('load', function() {
+                try {
+                    const frameDoc = browserFrame.contentDocument || browserFrame.contentWindow.document;
+                    const links = frameDoc.getElementsByTagName('a');
+                    
+                    for (let link of links) {
+                        if (link.target && link.target !== '_self') {
+                            link.target = '_self';
+                        }
+                    }
+                } catch (e) {
+                    // Cross-origin security exception - can't modify content
+                }
+            });
+            
+            // Initialize with blank page and history
+            browserFrame.src = 'about:blank';
+            document.title = 'Webster';
+            updateHistoryList();
         });
     </script>
-    
-    <div style="text-align: center; margin-bottom: 12px;">
-        <a href="https://de-ravendell.github.io" style="color: gray; text-decoration: none; background: none;">-------De Ravendell-------</a>
-    </div>
 </body>
 </html>

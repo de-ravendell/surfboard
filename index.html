@@ -204,7 +204,7 @@
         </div>
     </div>
     <div id="iframe-container">
-        <iframe id="browser-frame" src="about:blank"></iframe>
+        <iframe id="browser-frame" src="https://www.bing.com/search?q=Welcome%20to%20my%20webster"></iframe>
         <div id="error-message" class="error-message" style="display: none;"></div>
     </div>
 
@@ -237,23 +237,7 @@
             
             let history = JSON.parse(localStorage.getItem('websterHistory')) || [];
             let currentUrl = 'about:blank';
-            
-            // Update the URL bar whenever the iframe location changes
-            function updateUrlFromFrame() {
-                try {
-                    const frameUrl = browserFrame.contentWindow.location.href;
-                    if (frameUrl !== 'about:blank' && frameUrl !== currentUrl) {
-                        currentUrl = frameUrl;
-                        urlBar.value = currentUrl;
-                        document.title = `Webster | ${currentUrl}`;
-                    }
-                } catch (e) {
-                    // Cross-origin security exception - we can't access the URL
-                }
-            }
-            
-            // Check iframe URL periodically (since we can't always catch navigation events)
-            setInterval(updateUrlFromFrame, 500);
+           
             
             // Add URL to history
             function addToHistory(url) {
@@ -404,7 +388,7 @@
             });
             
             // Initialize with blank page and history
-            browserFrame.src = 'about:blank';
+            browserFrame.src = 'https://www.bing.com/search?q=Welcome%20to%20my%20webster';
             document.title = 'Webster';
             updateHistoryList();
         });

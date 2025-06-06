@@ -204,7 +204,7 @@
         </div>
     </div>
     <div id="iframe-container">
-        <iframe id="browser-frame" src="https://www.bing.com/search?q="></iframe>
+        <iframe id="browser-frame" src="https://www.bing.com/search?q=Welcome%20to%20my%20surfboard"></iframe>
         <div id="error-message" class="error-message" style="display: none;"></div>
     </div>
 
@@ -291,8 +291,8 @@
             function showError(message) {
                 errorMessage.textContent = message;
                 errorMessage.style.display = 'flex';
-                browserFrame.src = 'https://www.bing.com/search?q=';
-                currentUrl = 'https://www.bing.com/search?q=';
+                browserFrame.src = 'https://www.bing.com/search?q=Welcome%20to%20my%20surfboard';
+                currentUrl = 'https://www.bing.com/search?q=Welcome%20to%20my%20surfboard';
                 document.title = 'Surfboard';
             }
             
@@ -388,7 +388,7 @@
             });
             
             // Initialize with blank page and history
-            browserFrame.src = 'https://www.bing.com/search?q=';
+            browserFrame.src = 'https://www.bing.com/search?q=Welcome%20to%20my%20surfboard';
             document.title = 'Surfboard';
             updateHistoryList();
         });

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Webster</title>
+    <title>Surfboard</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -204,7 +204,7 @@
         </div>
     </div>
     <div id="iframe-container">
-        <iframe id="browser-frame" src="https://www.bing.com/search?q=Welcome%20to%20my%20webster"></iframe>
+        <iframe id="browser-frame" src="https://www.bing.com/search?q="></iframe>
         <div id="error-message" class="error-message" style="display: none;"></div>
     </div>
 
@@ -278,7 +278,7 @@
                     // Attempt to load the URL in the iframe
                     browserFrame.src = url;
                     currentUrl = url;
-                    document.title = `Webster | ${url}`;
+                    document.title = `Surfboard | ${url}`;
                     errorMessage.style.display = 'none';
                     
                     // Add to history immediately (don't wait for load event)
@@ -291,9 +291,9 @@
             function showError(message) {
                 errorMessage.textContent = message;
                 errorMessage.style.display = 'flex';
-                browserFrame.src = 'about:blank';
-                currentUrl = 'about:blank';
-                document.title = 'Webster';
+                browserFrame.src = 'https://www.bing.com/search?q=';
+                currentUrl = 'https://www.bing.com/search?q=';
+                document.title = 'Surfboard';
             }
             
             // History functions
@@ -388,8 +388,8 @@
             });
             
             // Initialize with blank page and history
-            browserFrame.src = 'https://www.bing.com/search?q=Welcome%20to%20my%20webster';
-            document.title = 'Webster';
+            browserFrame.src = 'https://www.bing.com/search?q=';
+            document.title = 'Surfboard';
             updateHistoryList();
         });
     </script>
